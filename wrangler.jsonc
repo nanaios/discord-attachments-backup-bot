@@ -19,10 +19,5 @@
 			"binding": "BUCKET",
 			"bucket_name": "discord-attachments-backup"
 		}
-	],
-	"triggers": {
-		"crons": [
-			"*/10 * * * *"
-		]
-	}
+	]
 }
