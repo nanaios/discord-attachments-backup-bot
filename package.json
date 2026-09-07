@@ -1,23 +1,23 @@
 {
-  "name": "discord-attachments-backup-bot",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "test": "vitest",
-    "cf-typegen": "wrangler types"
-  },
-  "devDependencies": {
-    "@cloudflare/vitest-plugin": "^1.0.0",
-    "@types/node": "^26.4.1",
-    "typescript": "^5.5.2",
-    "vitest": "~4.1.0",
-    "wrangler": "^4.129.0"
-  },
-  "dependencies": {
-    "@discordjs/rest": "^2.6.3",
-    "discord-api-types": "^0.38.55"
-  }
+	"name": "discord-attachments-backup-bot",
+	"version": "0.1.1",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-plugin": "^1.0.0",
+		"@types/node": "^26.4.1",
+		"typescript": "^5.5.2",
+		"vitest": "~4.1.0",
+		"wrangler": "^4.129.0"
+	},
+	"dependencies": {
+		"@discordjs/rest": "^2.6.3",
+		"discord-api-types": "^0.38.55"
+	}
 }
