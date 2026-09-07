@@ -7,14 +7,19 @@ interface Progress {
 }
 
 const backup = async (env: Env) => {
+	const start = new Date();
+	console.log(`backup start ${start}`);
 	const discord = new REST({
 		version: '10',
 	}).setToken(env.DISCORD_BOT_TOKEN);
 
 	const progress = await getProgress(env);
 	for (const prog of progress) {
-		backupChannel(discord, prog, env);
+		await backupChannel(discord, prog, env);
 	}
+	const end = new Date();
+	const duration = Math.floor((end.getTime() - start.getTime()) / 1000);
+	console.log(`backup end ${end}, job time = ${duration}`);
 };
 
 const getProgress = async (env: Env) => {
@@ -35,8 +40,9 @@ const backupChannel = async (discord: REST, prog: Progress, env: Env) => {
 
 	for (const message of messages) {
 		for (const attachment of message.attachments) {
-			backupAttachment(env, prog.channel_id, message, attachment);
+			await backupAttachment(env, prog.channel_id, message, attachment);
 		}
+		await env.PROGRESS.exec(`update backup_state set last_message_id = '${message.id}' where channel_id = '${prog.channel_id}'`);
 	}
 };
 
