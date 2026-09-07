@@ -13,27 +13,31 @@ const backup = async (env: Env) => {
 
 	const progress = await getProgress(env);
 	for (const prog of progress) {
-		const channel = (await discord.get(Routes.channel(prog.channel_id))) as APIChannel;
-		console.log(`start bacup job in ${channel.name}[${channel.id}]`);
-
-		const messages = (await discord.get(Routes.channelMessages(prog.channel_id), {
-			query: new URLSearchParams({
-				after: prog.last_message_id,
-				limit: '1',
-			}),
-		})) as APIMessage[];
-
-		for (const message of messages) {
-			for (const attachment of message.attachments) {
-				backupAttachment(env, prog.channel_id, message, attachment);
-			}
-		}
+		backupChannel(discord, prog, env);
 	}
 };
 
 const getProgress = async (env: Env) => {
 	const results = await env.PROGRESS.prepare('select * from backup_state').all();
 	return results['results'] as unknown as Progress[];
+};
+
+const backupChannel = async (discord: REST, prog: Progress, env: Env) => {
+	const channel = (await discord.get(Routes.channel(prog.channel_id))) as APIChannel;
+	console.log(`start bacup job in ${channel.name}[${channel.id}]`);
+
+	const messages = (await discord.get(Routes.channelMessages(prog.channel_id), {
+		query: new URLSearchParams({
+			after: prog.last_message_id,
+			limit: '1',
+		}),
+	})) as APIMessage[];
+
+	for (const message of messages) {
+		for (const attachment of message.attachments) {
+			backupAttachment(env, prog.channel_id, message, attachment);
+		}
+	}
 };
 
 async function backupAttachment(env: Env, channelId: string, message: APIMessage, attachment: APIAttachment) {
@@ -53,13 +57,9 @@ async function backupAttachment(env: Env, channelId: string, message: APIMessage
 	}
 	const key = `${channelId}/${message.id}/${attachment.id}-${attachment.filename}`;
 	const contentType = response.headers.get('content-type') ?? attachment.content_type ?? 'application/octet-stream';
-
-	if (response.headers.get('content-type') != attachment.content_type) {
-		console.log(`warn! file[${key}] contentType ${response.headers.get('content-type')},${attachment.content_type} has conflict!`);
-	}
-	await env.BUCKET.put(key, response.body, {
+	return env.BUCKET.put(key, response.body, {
 		httpMetadata: {
-			contentType: contentType,
+			contentType,
 		},
 
 		customMetadata: {
@@ -69,7 +69,6 @@ async function backupAttachment(env: Env, channelId: string, message: APIMessage
 			originalFilename: attachment.filename,
 		},
 	});
-	console.log(`Backed up: ${key}, contentType = ${contentType}`);
 }
 
 export { backup };
